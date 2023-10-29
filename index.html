@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Elevensec - Have I Been Pwned Checker</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 48px;
+            margin-top: 0px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input, button {
+            font-size: 18px;
+            padding: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .alert {
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            width: 50%;
+            margin: auto;
+        }
+        .alert-success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border-color: #d6e9c6;
+        }
+        .alert-danger {
+            background-color: #f2dede;
+            color: #a94442;
+            border-color: #ebccd1;
+        }
+    </style>
+</head>
+<body>
+
+  <h1>ElevenScan©</h1>
+  <h2>Check if you've been pwned</h2>
+
+<form id="checkForm">
+    <input type="email" id="email" placeholder="Enter your email" required>
+    <button type="submit">Check</button>
+</form>
+
+<div id="result"></div>
+<div id="advice"></div>
+
+
+<script>
+    $(document).ready(function() {
+        $('#checkForm').submit(function(event) {
+            event.preventDefault();
+            let email = $('#email').val();
+
+            $.post("/check_email", { email: email }, function(data, status) {
+                let advice = '';
+                if (data.status === "Breaches found") {
+                    let breachesList = "<ul>";
+                    for (let i = 0; i < data.data.length; i++) {
+                        breachesList += "<li>" + data.data[i] + "</li>";
+                    }
+                    breachesList += "</ul>";
+                    $("#result").html('<div class="alert alert-danger">Breaches found:<br>' + breachesList + '</div>');
+                    advice = "<strong>ElevenSec Recommendations:</strong> <ol><li>Change your passwords.</li><li>Enable two-factor authentication.</li><li>Be cautious of phishing emails.</li></ol>";
+                } else {
+                    $("#result").html('<div class="alert alert-success">No breaches found for this email.</div>');
+                    advice = "<strong>Congratulations!</strong> Keep practicing good security hygiene.";
+                }
+                $("#advice").html(advice);
+            }).fail(function(data) {
+                $("#result").html('<div class="alert alert-danger">An error occurred.</div>');
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
